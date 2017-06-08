@@ -1,28 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct grafo Grafo;
-
-struct grafo{
+typedef struct grafo{
 	int n_vertices; //Numero de vertices
-	int grau_max; 	//Numero maximo de ligacoes para cada vertice
-	int** arestas; 	//Linhas representam os vertices e as colunas as ligacoes
-	int** pesos;	//Pesos das ligacoes
-	int* grau;		//Grau de cada aresta,ou seja, quantidade de ligacoes q aquela aresta possui
-};
+	int **arestas; 	//Linhas representam os vertices e as colunas as ligacoes
+	int **pesos;	//Linhas representam os vertices e as colunas os pesos
+	int *grau;		//Grau de cada aresta, ou seja, quantidade de ligacoes que aquela aresta possui
+} Grafo;
 
-Grafo* criar(int n_vertices, int grau_max); 					//Criar grafo
-int inserir(Grafo* grafo, int origem, int destino, int peso); 	//Inserir aresta no grafo
+Grafo* criar(int n_vertices); 					//Criar grafo de "n_vertices" vertices
+
+int inserir(Grafo* grafo, int origem, int destino, int peso); 	//Inserir aresta entre a origem e o destino
+
 int remover(Grafo* grafo, int origem, int destino); 			//Remover aresta do grafo
+
 void liberar(Grafo* grafo); 									//Liberar alocacoes de memoria
 
-int menorDistancia(int* distancia, int* visitado, int n_vertices);
-int menorCaminho(Grafo *grafo, int inicial, int* anterior, int* distancia);
+int menorDistancia(int* distancia, int* visitado, int n_vertices);   //Menor distancia entre dois vertices
 
-void imprimir(int* menorCaminho, int t);
+int menorCaminho(Grafo *grafo, int inicial, int* anterior, int* distancia);   //Menor caminho entre dois vertices
+
+void imprimir(int* menorCaminho, int t);                        //
 
 int main(){
-	Grafo *grafo = criar(5, 5);
+	Grafo *grafo = criar(5);
 	inserir(grafo, 0, 1, 2);
 	inserir(grafo, 1, 3, 1);
 	inserir(grafo, 1, 2, 3);
@@ -31,28 +32,32 @@ int main(){
 	inserir(grafo, 3, 4, 2);
 	inserir(grafo, 4, 1, 1);
 
-	int anteriror[5], distancia[5];
-	menorCaminho(grafo, 0, anteriror, distancia);
+	int anterior[5], distancia[5];
+	menorCaminho(grafo, 0, anterior, distancia);
 
-	imprimir(anteriror, 5);
+	imprimir(anterior, 5);
 
 	liberar(grafo);
 }
 
-Grafo* criar(int n_vertices, int grau_max){
-	Grafo* grafo = (Grafo*) malloc(sizeof(struct grafo));
-	if(grafo != NULL){
-		int i;
+Grafo* criar(int n_vertices){
+	Grafo* grafo = (Grafo*) malloc(sizeof(struct grafo));           // Alocando o grafo na memória
+	if(grafo != NULL){                                              // Caso a alocação tiver funcionado
+
 		grafo->n_vertices = n_vertices;
-		grafo->grau_max = grau_max;
-		grafo->arestas = (int**)malloc(n_vertices * sizeof(int*));
-		grafo->pesos = (int**)malloc(n_vertices * sizeof(int*));
-		grafo->grau = (int*)calloc(n_vertices, sizeof(int));
-		for (i = 0; i < n_vertices; i++){
-			grafo->arestas[i] = (int*)malloc(grau_max*sizeof(int));
-			grafo->pesos[i] = (int*)malloc(grau_max*sizeof(int));
+
+		grafo->arestas = (int**)malloc(n_vertices * sizeof(int*));  // Alocando as arestas
+		grafo->pesos = (int**)malloc(n_vertices * sizeof(int*));    // Alocando os pesos
+
+		grafo->grau = (int*)calloc(n_vertices, sizeof(int));        // Alocando o grau dos vertices com 0
+
+		for (int i = 0; i < n_vertices; i++){
+			grafo->arestas[i] = (int*)malloc(n_vertices * sizeof(int));
+			grafo->pesos[i] = (int*)malloc(n_vertices * sizeof(int));
 		}
 	}
+
+	return grafo;
 }
 
 int inserir(Grafo* grafo, int origem, int destino, int peso){
@@ -127,7 +132,7 @@ int menorDistancia(int* distancia, int* visitado, int n_vertices){
 }
 
 int menorCaminho(Grafo *grafo, int inicial, int* anterior, int* distancia){
-	int i, cont, n_vertices, u, vizinho_u, *visitados;  
+	int cont, n_vertices, u, vizinho_u, *visitados;  
 	cont = n_vertices = grafo->n_vertices;
 	visitados = (int*)malloc(n_vertices*sizeof(int));
 	for(int i=0; i < n_vertices; i++){
@@ -144,7 +149,7 @@ int menorCaminho(Grafo *grafo, int inicial, int* anterior, int* distancia){
 		visitados[u] = 1;
 		cont--;
 
-		for(i=0; i<grafo->grau[u]; i++){ //Visitando os vizinhos de u
+		for(int i=0; i<grafo->grau[u]; i++){ //Visitando os vizinhos de u
 			vizinho_u = grafo->arestas[u][i];
 			if(distancia[i] < 0){ //Se ninguem chegou nele ainda
 				distancia[vizinho_u] = distancia[u] + grafo->pesos[u][i];
@@ -159,14 +164,13 @@ int menorCaminho(Grafo *grafo, int inicial, int* anterior, int* distancia){
 	}
 
 	free(visitados);
-
+	return 3;
 }
 
 void imprimir(int* menorCaminho, int t){
-	int i;
-	for(i = 0; i < t; i++){
+	for(int i = 0; i < t; i++){
 		if(i == t-1)
-			printf("%d \n", menorCaminho[i]);
+			printf("%d\n", menorCaminho[i]);
 		else
 			printf("%d -> \n", menorCaminho[i]);
 	}
