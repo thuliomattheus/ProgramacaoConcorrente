@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <time.h>
 
 typedef struct grafo{
 	int n_vertices; //Numero de vertices
@@ -28,24 +30,37 @@ void imprimirDistancias(Grafo* grafo, int inicial);
 
 void imprimirMenorDistancia(Grafo* grafo, int inicial, int final);
 
+void preencherGrafo(Grafo* grafo);
+
 int main(){
-	Grafo *grafo = criar(7);
-	inserir(grafo, 0, 1, 2);
-	inserir(grafo, 1, 3, 1);
-	inserir(grafo, 1, 2, 3);
-	inserir(grafo, 2, 4, 2);
-	inserir(grafo, 3, 0, 5);
-	inserir(grafo, 3, 4, 2);
-	inserir(grafo, 4, 1, 1);
-	inserir(grafo, 4, 1, 2);
-	inserir(grafo, 5, 1, 1);
+
+	Grafo* grafo;
+	srand(time(NULL));
+
+	int n = 1;
+
+	printf("A quantidade de vertices do grafo sera igual a uma potencia de 2\n");
+	printf("Digite o expoente que sera utilizado para a criacao. n deve ser no minimo 2.\n");
+	printf("\n	Exemplo: n = 2, vertices = 4;     n=3, vertices = 8...\n");
+
+	while(n<2){
+		printf("n deve ser no minimo 2.\n");
+		printf("n = ");
+		scanf("%d", &n);
+	}
+
+	printf("\n\n");
+
+	int n_vertices = (int) pow(2, n);
+	grafo = criar(n_vertices);
+
+	preencherGrafo(grafo);
+
+	printf("n = %d", grafo->n_vertices);
 
 	imprimirGrafo(grafo);
-
 	imprimirDistancias(grafo, 5);
-
 	imprimirMenorDistancia(grafo, 2, 3);
-
 	liberar(grafo);
 }
 
@@ -284,5 +299,30 @@ void imprimirMenorDistancia(Grafo* grafo, int inicial, int final){
 	}
 
 	printf("\n");
+
+}
+
+void preencherGrafo(Grafo* grafo){
+
+	int n_vertices = grafo->n_vertices;
+
+	for(int i=0; i < n_vertices; i++){
+
+		// Primeiro vamos preencher a ligação entre a camada superior e a camada do meio 
+
+		if(i < n_vertices/4){
+			for(int j = n_vertices/4; j< n_vertices*3/4; j++){
+				inserir(grafo, i, j, rand()%10);
+			}
+		}
+
+		// Por fim, preencheremos a ligação entre as camadas do meio e inferior
+
+	else if(i >= n_vertices*3/4){
+			for(int j = n_vertices/4; j< n_vertices*3/4; j++){
+				inserir(grafo, i, j, rand()%10);
+			}	
+		}	
+	}
 
 }
